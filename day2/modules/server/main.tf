@@ -17,15 +17,6 @@ resource "hcloud_ssh_key" "web" {
   public_key = var.ssh_key_public
 }
 
-# data "hcloud_ssh_key" "existing" {
-#   count = var.create_ssh_key ? 0 : 1
-#   name  = var.ssh_key_name
-# }
-
-# locals {
-#   ssh_key_id = var.create_ssh_key ? hcloud_ssh_key.default[0].id : data.hcloud_ssh_key.existing[0].id
-# }
-
 resource "hcloud_server" "web" {
   name         = var.server_name
   server_type  = var.server_type

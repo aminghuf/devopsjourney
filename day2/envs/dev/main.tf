@@ -31,7 +31,6 @@ module "web_server" {
   cloudflare_zone_id = var.cloudflare_zone_id
   dns_record_name    = var.dns_record_name
   ssh_key_name       = var.ssh_key_name
-  create_ssh_key     = true
   firewall_name      = var.firewall_name
   ssh_key_public     = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPgVm8z/o6wJqDa951vcCIjVO/3qykgHHEAWM+IL4nez amin.gha98@gmail.com"
 }

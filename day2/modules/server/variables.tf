@@ -34,14 +34,8 @@ variable "dns_record_name" {
 }
 
 variable "ssh_key_name" {
-  description = "Name of the SSH key: created in Hetzner Cloud when create_ssh_key is true, or looked up by this name when create_ssh_key is false."
+  description = "name of ssh key"
   type        = string
-}
-
-variable "create_ssh_key" {
-  description = "Whether to create a new SSH key in Hetzner Cloud (true) or reuse an existing one by name via a data source (false)."
-  type        = bool
-  default     = true
 }
 
 variable "firewall_name" {
