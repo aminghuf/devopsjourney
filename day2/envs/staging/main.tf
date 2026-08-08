@@ -1,4 +1,6 @@
 terraform {
+  required_version = ">= 1.5.0"
+
   required_providers {
     hcloud = {
       source  = "hetznercloud/hcloud"
@@ -22,15 +24,15 @@ provider "cloudflare" {
 
 
 module "web_server" {
-  source = "../../modules/server"
-  server_name = var.server_name
-  server_type = var.server_type
-  server_image = var.server_image
-  server_location = var.server_location
-  my_ip = var.my_ip
+  source             = "../../modules/server"
+  server_name        = var.server_name
+  server_type        = var.server_type
+  server_image       = var.server_image
+  server_location    = var.server_location
+  my_ip              = var.my_ip
   cloudflare_zone_id = var.cloudflare_zone_id
-  dns_record_name = var.dns_record_name
-  ssh_key_name = var.ssh_key_name
-  create_ssh_key = false
-  firewall_name = var.firewall_name
+  dns_record_name    = var.dns_record_name
+  ssh_key_name       = var.ssh_key_name
+  create_ssh_key     = false
+  firewall_name      = var.firewall_name
 }

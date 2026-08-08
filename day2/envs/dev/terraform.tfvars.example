@@ -1,0 +1,16 @@
+server_name = ""
+server_type = "cx23"
+server_image = "ubuntu-24.04"
+server_location = "fsn1"
+
+hcloud_token = ""
+my_ip        = "" 
+cloudflare_zone_id = ""
+cloudflare_api_token = ""
+
+dns_record_name = ""
+
+ssh_key_name = ""
+firewall_name = ""
+
+ssh_key_public = ""

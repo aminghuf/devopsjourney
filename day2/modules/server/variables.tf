@@ -35,7 +35,7 @@ variable "dns_record_name" {
 
 variable "ssh_key_name" {
   description = "Name of the SSH key: created in Hetzner Cloud when create_ssh_key is true, or looked up by this name when create_ssh_key is false."
-  type = string
+  type        = string
 }
 
 variable "create_ssh_key" {
@@ -46,7 +46,7 @@ variable "create_ssh_key" {
 
 variable "firewall_name" {
   description = "name of firewall"
-  type = string
+  type        = string
 }
 
 variable "ssh_key_public" {

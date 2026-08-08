@@ -84,10 +84,10 @@ resource "hcloud_floating_ip" "web" {
 
 resource "cloudflare_record" "server_dns" {
   zone_id = var.cloudflare_zone_id
-  name    = var.dns_record_name                       
+  name    = var.dns_record_name
   content = hcloud_floating_ip.web.ip_address # Dynamically grabs the Hetzner IP
   type    = "A"
-  proxied = false                                   
+  proxied = false
 }
 
 resource "hcloud_floating_ip_assignment" "main" {
