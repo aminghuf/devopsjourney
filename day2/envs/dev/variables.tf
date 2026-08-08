@@ -47,13 +47,12 @@ variable "ssh_key_name" {
   type = string
 }
 
-variable "create_ssh_key" {
-  description = "Whether to create a new SSH key in Hetzner Cloud (true) or reuse an existing one by name (false)."
-  type        = bool
-  default     = true
-}
-
 variable "firewall_name" {
   description = "name of firewall"
   type = string
+}
+
+variable "ssh_key_public" {
+  description = "The public SSH key to be used for the server."
+  type        = string
 }

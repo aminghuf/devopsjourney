@@ -12,18 +12,10 @@ terraform {
   }
 }
 
-provider "hcloud" {
-  token = var.hcloud_token
-}
-
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
-}
-
 resource "hcloud_ssh_key" "default" {
   count      = var.create_ssh_key ? 1 : 0
   name       = var.ssh_key_name
-  public_key = file(pathexpand("~/.ssh/id_ed25519.pub"))
+  public_key = var.ssh_key_public
 }
 
 data "hcloud_ssh_key" "existing" {

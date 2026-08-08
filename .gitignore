@@ -5,4 +5,3 @@
 *.tfstate.*
 .terraform.tfstate.lock.info
 crash.log
-.terraform.lock.hcl
