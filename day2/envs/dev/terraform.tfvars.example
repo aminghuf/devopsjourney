@@ -1,14 +1,14 @@
-server_name = "amin_dev"
+server_name = "amin-dev"
 server_type = "cx22"
 server_image = "ubuntu-24.04"
 server_location = "fsn1"
 
-hcloud_token = "opiq_1230912jdoi1j2098u3ej1092ue3"
-my_ip        = "127.0.0.1" 
-cloudflare_zone_id = "oiudoi12u309812309183231"
-cloudflare_api_token = "ikpdo1ie20983019832"
+hcloud_token = "<your-hetzner-api-token>"
+my_ip        = "<your-ipv4-address>"
+cloudflare_zone_id = "<your-cloudflare-zone-id>"
+cloudflare_api_token = "<your-cloudflare-api-token>"
 
 dns_record_name = "amin-dns-dev"
 
-ssh_key_name = "amin_dev"
-firewall_name = "amin_frw_dev"
+ssh_key_name = "amin-dev"
+firewall_name = "amin-frw-dev"
