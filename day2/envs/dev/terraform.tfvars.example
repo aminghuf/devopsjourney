@@ -1,5 +1,5 @@
 server_name = ""
-server_type = "cx23"
+server_type = "cx22"
 server_image = "ubuntu-24.04"
 server_location = "fsn1"
 

@@ -2,7 +2,7 @@ terraform {
   required_providers {
     hcloud = {
       source  = "hetznercloud/hcloud"
-      version = "~> 1.45.0"
+      version = ">= 1.45.0"
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
@@ -12,27 +12,26 @@ terraform {
   }
 }
 
-resource "hcloud_ssh_key" "default" {
-  count      = var.create_ssh_key ? 1 : 0
+resource "hcloud_ssh_key" "web" {
   name       = var.ssh_key_name
   public_key = var.ssh_key_public
 }
 
-data "hcloud_ssh_key" "existing" {
-  count = var.create_ssh_key ? 0 : 1
-  name  = var.ssh_key_name
-}
+# data "hcloud_ssh_key" "existing" {
+#   count = var.create_ssh_key ? 0 : 1
+#   name  = var.ssh_key_name
+# }
 
-locals {
-  ssh_key_id = var.create_ssh_key ? hcloud_ssh_key.default[0].id : data.hcloud_ssh_key.existing[0].id
-}
+# locals {
+#   ssh_key_id = var.create_ssh_key ? hcloud_ssh_key.default[0].id : data.hcloud_ssh_key.existing[0].id
+# }
 
 resource "hcloud_server" "web" {
   name         = var.server_name
   server_type  = var.server_type
   image        = var.server_image
   location     = var.server_location
-  ssh_keys     = [local.ssh_key_id]
+  ssh_keys     = [hcloud_ssh_key.web.id]
   firewall_ids = [hcloud_firewall.web_and_ssh.id]
 
   # Natively configure persistent network settings on first boot

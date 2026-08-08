@@ -52,5 +52,5 @@ variable "firewall_name" {
 variable "ssh_key_public" {
   description = "The public SSH key to register when create_ssh_key is true. Unused when reusing an existing key."
   type        = string
-  default     = ""
+  
 }
