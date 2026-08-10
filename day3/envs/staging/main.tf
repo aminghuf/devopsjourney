@@ -10,6 +10,13 @@ terraform {
     }
 
   }
+  backend "s3" {
+    bucket       = "s3-bucket-devopsjourney"
+    key          = "day3/staging/platform.tfstate"
+    region       = "eu-north-1"
+    encrypt      = true
+    use_lockfile = true # native S3 locking, TF >= 1.10
+  }
 }
 provider "aws" {
   region = "eu-north-1"
@@ -40,6 +47,7 @@ module "web_server" {
   cloudflare_zone_id = data.aws_ssm_parameter.cloudflare_zone_id.value
   dns_record_name    = var.dns_record_name
   ssh_key_name       = var.ssh_key_name
-  create_ssh_key     = false
+  create_ssh_key     = true
   firewall_name      = var.firewall_name
+  ssh_key_public     = var.ssh_key_public
 }

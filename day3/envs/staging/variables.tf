@@ -37,3 +37,8 @@ variable "firewall_name" {
   description = "name of firewall"
   type        = string
 }
+
+variable "ssh_key_public" {
+  description = "The public SSH key to be used for the server."
+  type        = string
+}

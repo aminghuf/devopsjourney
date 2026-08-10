@@ -10,6 +10,13 @@ terraform {
     }
 
   }
+  backend "s3" {
+    bucket       = "s3-bucket-devopsjourney"
+    key          = "day3/dev/platform.tfstate"
+    region       = "eu-north-1"
+    encrypt      = true
+    use_lockfile = true # native S3 locking, TF >= 1.10
+  }
 }
 provider "aws" {
   region = "eu-north-1"
