@@ -10,6 +10,7 @@ variable "cloudflare_zone_id" {
 }
 variable "hcloud_token" {
   sensitive = true
+  type      = string
 }
 
 variable "my_ip" {
@@ -44,10 +45,10 @@ variable "dns_record_name" {
 
 variable "ssh_key_name" {
   description = "name of ssh key"
-  type = string
+  type        = string
 }
 
 variable "firewall_name" {
   description = "name of firewall"
-  type = string
+  type        = string
 }

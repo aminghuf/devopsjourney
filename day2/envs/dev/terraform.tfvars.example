@@ -1,0 +1,14 @@
+server_name = "amin-dev"
+server_type = "cx22"
+server_image = "ubuntu-24.04"
+server_location = "fsn1"
+
+hcloud_token = "<your-hetzner-api-token>"
+my_ip        = "<your-ipv4-address>"
+cloudflare_zone_id = "<your-cloudflare-zone-id>"
+cloudflare_api_token = "<your-cloudflare-api-token>"
+
+dns_record_name = "amin-dns-dev"
+
+ssh_key_name = "amin-dev"
+firewall_name = "amin-frw-dev"
