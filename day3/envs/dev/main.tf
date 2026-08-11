@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.10"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -22,18 +23,8 @@ provider "aws" {
   region = "eu-north-1"
 }
 
-data "aws_ssm_parameter" "cloudflare_api_token" {
-  name            = "/day3/dev/cloudflare_api_token"
-  with_decryption = true
-}
-
-data "aws_ssm_parameter" "cloudflare_zone_id" {
-  name            = "/day3/dev/cloudflare_zone_id"
-  with_decryption = true
-}
-
 provider "cloudflare" {
-  api_token = data.aws_ssm_parameter.cloudflare_api_token.value
+  
 }
 
 module "web_server" {

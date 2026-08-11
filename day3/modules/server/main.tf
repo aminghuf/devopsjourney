@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.10"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -51,6 +52,9 @@ resource "aws_instance" "web" {
 
   tags = {
     Name = var.server_name
+  }
+  lifecycle {
+    ignore_changes = [ami]
   }
 }
 

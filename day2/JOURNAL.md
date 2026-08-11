@@ -33,7 +33,10 @@ Hook: create-vs-reuse for the SSH key — worth a data-source detour, then worth
 
 The reuse-vs-create SSH key detour was avoidable — I designed the "staging looks up dev's key" path before asking what happens when dev gets destroyed. The dependency between two independent state files should have been the first question, not something I noticed after wiring it up. Next time: before adding any cross-environment lookup (data source, remote state, shared name), write down what each environment's `destroy` does to the others. If the answer isn't "nothing," don't build it that way.
 
-Also left for later, not yet done: `ssh_key_public` is currently hardcoded per-env in `main.tf` rather than sourced from `terraform.tfvars`, so cloning this and running it from zero doesn't work for anyone but me — that needs to become a variable before this is actually reusable by someone else.
+Also left for later, not yet done: `ssh_key_public` is currently hardcoded per-env in `main.tf` rather than sourced from `terraform.tfvars`, so cloning this and 
+running it from zero doesn't work for anyone but me — that needs to become a variable before this is actually reusable by someone else.
+
+Hetzner states deleted manyally in 10/8/26. going through day3 with fresh starting with aws
 
 ## How to run this
 
