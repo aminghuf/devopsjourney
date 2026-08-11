@@ -24,7 +24,7 @@ provider "aws" {
 }
 
 provider "cloudflare" {
-
+  
 }
 
 module "web_server" {

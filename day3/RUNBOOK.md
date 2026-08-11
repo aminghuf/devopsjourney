@@ -30,6 +30,66 @@ Applies to both envs — swap the state key: `day3/dev/platform.tfstate` or `day
 - **When someone else's name is in `Who`.** Ask first. A five-minute Slack message costs less than a broken shared state file.
 - **As a reflex for any Terraform error.** `force-unlock` fixes *stuck locks*, not plan errors, provider errors, or auth failures — those look completely different (no `Lock Info` block) and unlocking does nothing for them.
 
+### Proof (run against `envs/dev`, 2026-08-11)
+
+Two terminals' worth of behavior, run for real against the live `s3-bucket-devopsjourney` backend. Terminal A holds the lock (simulating a second person mid-`apply`); terminal B is the person who'd be staring at the error.
+
+**Terminal A — a lock object exists** (confirmed as an actual object in the bucket, not a mocked file):
+```
+$ aws s3api list-objects-v2 --bucket s3-bucket-devopsjourney --prefix "day3/dev/platform.tfstate" \
+    --query "Contents[].Key" --output text
+day3/dev/platform.tfstate
+day3/dev/platform.tfstate.tflock
+```
+
+**Terminal B — `terraform plan` while that lock is held:**
+```
+$ terraform plan -no-color -lock-timeout=3s
+
+Acquiring state lock. This may take a few moments...
+
+Error: Error acquiring the state lock
+
+Error message: operation error S3: PutObject, https response error
+StatusCode: 412, RequestID: K0F60S3YG6F1WM26, HostID:
+5niOf/yQsUvzizun5apdFAYAmlAHCLjqS3J/d9/oW7tUCDKyhENyb5XfLbYLzjj7nomRMXNyHW4=,
+api error PreconditionFailed: At least one of the pre-conditions you
+specified did not hold
+Lock Info:
+  ID:        d3471d65-2af6-4e17-8e5c-e3f71d508b5e
+  Path:      s3-bucket-devopsjourney/day3/dev/platform.tfstate
+  Operation: OperationTypeApply
+  Who:       amin@staging-box
+  Version:   1.15.8
+  Created:   2026-08-11 15:15:39 +0000 UTC
+  Info:
+
+Terraform acquires a state lock to protect the state from being written
+by multiple users at the same time. Please resolve the issue above and try
+again. For most commands, you can disable locking with the "-lock=false"
+flag, but this is not recommended.
+```
+That's a real S3 `412 PreconditionFailed` on the conditional `PutObject` — the mechanism described above, not a simulated error message.
+
+**Terminal B — after confirming `Who` is dead, force-unlock using the real `LOCK_ID` from the error:**
+```
+$ terraform force-unlock d3471d65-2af6-4e17-8e5c-e3f71d508b5e
+Terraform state has been successfully unlocked!
+
+The state has been unlocked, and Terraform commands should now be able to
+obtain a new lock on the remote state.
+```
+
+**Confirmed clean afterward** — lock object gone, plan runs normally:
+```
+$ aws s3api list-objects-v2 --bucket s3-bucket-devopsjourney --prefix "day3/dev/platform.tfstate.tflock" --query "Contents[].Key"
+None
+
+$ terraform plan -no-color -lock-timeout=5s
+...
+Plan: 0 to add, 1 to change, 0 to destroy.
+```
+
 ## 2. Restoring a previous state version (S3 bucket versioning)
 
 **Symptom:** the current state file is bad — truncated, hand-edited into a broken shape, overwritten by a mistaken `terraform state push`, or otherwise not a valid reflection of what Terraform itself last wrote. Versioning is enabled on `s3-bucket-devopsjourney` specifically so this is recoverable without S3 backups.
@@ -75,7 +135,9 @@ Applies to both envs — swap the state key: `day3/dev/platform.tfstate` or `day
 
 ## Acceptance criteria for this runbook
 
-- [ ] `force-unlock` command documented with the actual `Lock Info` fields to check first.
-- [ ] Explicit "when not to" for `force-unlock` — concurrent-run corruption risk named.
+- [x] `force-unlock` command documented with the actual `Lock Info` fields to check first.
+- [x] Explicit "when not to" for `force-unlock` — concurrent-run corruption risk named.
+- [x] `force-unlock` proven against the live backend — real S3 412 lock rejection, real `LOCK_ID`, real unlock, confirmed clean afterward (see Proof, above).
 - [ ] Previous-state-version restore documented using this bucket's real versioning (list → inspect → copy-object restore, not delete-and-hope).
 - [ ] Explicit "when not to" for state restore — drift vs. corruption distinction named, `plan`-before-`apply` step called out.
+- [ ] Previous-state-version restore proven against the live backend (not yet run — force-unlock proof above didn't require it since dev's state was never actually corrupted, just locked).
