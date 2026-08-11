@@ -42,3 +42,8 @@ variable "ssh_key_public" {
   description = "The public SSH key to be used for the server."
   type        = string
 }
+
+variable "cloudflare_zone_id" {
+  description = "The DNS Zone ID of your domain in Cloudflare"
+  type        = string
+}

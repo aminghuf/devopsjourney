@@ -24,7 +24,7 @@ provider "aws" {
 }
 
 provider "cloudflare" {
-  
+
 }
 
 module "web_server" {
@@ -34,7 +34,7 @@ module "web_server" {
   server_image       = var.server_image
   server_location    = var.server_location
   my_ip              = var.my_ip
-  cloudflare_zone_id = data.aws_ssm_parameter.cloudflare_zone_id.value
+  cloudflare_zone_id = var.cloudflare_zone_id
   dns_record_name    = var.dns_record_name
   ssh_key_name       = var.ssh_key_name
   create_ssh_key     = true

@@ -23,18 +23,7 @@ provider "aws" {
   region = "eu-north-1"
 }
 
-data "aws_ssm_parameter" "cloudflare_api_token" {
-  name            = "/day3/staging/cloudflare_api_token"
-  with_decryption = true
-}
-
-data "aws_ssm_parameter" "cloudflare_zone_id" {
-  name            = "/day3/staging/cloudflare_zone_id"
-  with_decryption = true
-}
-
 provider "cloudflare" {
-  api_token = data.aws_ssm_parameter.cloudflare_api_token.value
 }
 
 
@@ -45,7 +34,7 @@ module "web_server" {
   server_image       = var.server_image
   server_location    = var.server_location
   my_ip              = var.my_ip
-  cloudflare_zone_id = data.aws_ssm_parameter.cloudflare_zone_id.value
+  cloudflare_zone_id = var.cloudflare_zone_id
   dns_record_name    = var.dns_record_name
   ssh_key_name       = var.ssh_key_name
   create_ssh_key     = true

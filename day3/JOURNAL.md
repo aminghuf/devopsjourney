@@ -36,6 +36,15 @@ Hook: the SSH-key reuse pattern day2's retro said to watch out for came back any
 - Applying dev first made staging's apply succeed, but that's papering over it, not fixing it: destroy dev and staging breaks again on next apply, same as day2.
 - Fix: staging now creates its own key pair (`create_ssh_key = true`, `ssh_key_name = "stagingenv"`, its own `ssh_key_public` var/tfvar) instead of borrowing dev's. AWS doesn't allow swapping an instance's key pair in place, so this forced a real replace of the already-running `staging-server-01` — confirmed the blast radius (EIP allocation itself is untouched, so the public IP/DNS record doesn't change, ~30s of actual downtime) before applying. Verified after: `dev-server-01` on `devenv`, `staging-server-01` on `stagingenv`, fully independent key pairs, no more shared lookup.
 
+## What's missing — the actual ticket isn't in here yet
+
+Mentor feedback, verbatim, because it's correct and shouldn't get softened in the rewrite: "Lock proof and drift demo are nowhere in the repo. You did the drift exercise with me and produced a good plan diff — none of it is written down. That plus the lock test is Day 3. Right now the repo shows a cloud migration, not the ticket."
+
+Concretely still owed:
+- **State lock proof.** `use_lockfile = true` is sitting in both backend blocks and gets asserted as "native S3 locking" above, but that's a claim, not a demonstration. Never actually ran a concurrent `apply`/`plan` against the same state and captured what happens when the lock is held — no proof it works, no proof of what the error looks like, nothing to point at.
+- **Drift demo.** Was actually done — live, interactively, produced a real plan diff worth keeping — and then never written down anywhere. The repo currently has zero evidence this happened: no captured `plan` output, no note on what was changed out-of-band to cause the drift, no explanation of what the diff showed or how it was reconciled.
+- Everything logged above (Hetzner→AWS, SSM, S3 backend, staging/dev decoupling) is real work and stays in this file, but it was scope creep relative to what day3 was actually supposed to prove out. It shouldn't be read as a substitute for the lock/drift ticket.
+
 ## What I'd do differently
 
 Should have asked "what does creating an existing-lookup `data` source between two environments cost me" *before* wiring it up, not after the first failed apply — this is the identical mistake day2's retro named and said to check for up front, and it still shipped, just on a different provider. The check is cheap: for any cross-env data source or lookup, write down what an isolated `terraform apply` of the *other* environment alone requires, before deciding it's independent.

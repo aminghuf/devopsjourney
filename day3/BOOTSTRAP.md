@@ -43,7 +43,17 @@ aws s3api put-bucket-encryption \
 
 ## SSM parameters (Cloudflare secrets)
 
-Terraform reads these at plan/apply time via `aws_ssm_parameter` data sources ([envs/dev/main.tf](envs/dev/main.tf), [envs/staging/main.tf](envs/staging/main.tf)) — they are not stored in `.tfvars` or state.
+These are no longer read by Terraform itself (no `aws_ssm_parameter` data source in `main.tf` anymore). Instead, each env's `.envrc` (direnv) fetches them from SSM at shell-load time and exports them as plain env vars:
+
+```sh
+export CLOUDFLARE_API_TOKEN=$(aws ssm get-parameter --name "/day3/<env>/cloudflare_api_token" --region eu-north-1 --with-decryption --query Parameter.Value --output text)
+export TF_VAR_cloudflare_zone_id=$(aws ssm get-parameter --name "/day3/<env>/cloudflare_zone_id" --region eu-north-1 --with-decryption --query Parameter.Value --output text)
+```
+
+- `CLOUDFLARE_API_TOKEN` is picked up natively by the Cloudflare provider (`provider "cloudflare" {}` is intentionally empty in both envs' `main.tf`) — no Terraform variable involved.
+- `CLOUDFLARE_ZONE_ID` has no such native provider env var (zone id is a per-resource argument, not a provider setting), so it's exported with the `TF_VAR_` prefix instead, which Terraform maps directly onto `var.cloudflare_zone_id` (declared in each env's `variables.tf`, passed into `modules/server` from `main.tf`).
+- Practical effect: `terraform init`/`plan`/`apply` no longer need `ssm:GetParameter` IAM permission themselves — direnv does that lookup once, before Terraform even runs. Whatever shell runs `cd envs/<env>` needs `direnv` installed and `direnv allow`'d, plus the same `ssm:GetParameter` permission on `/day3/<env>/*`, just earlier in the pipeline than before.
+- Still not stored in `.tfvars`, state, or git — same guarantee as before, just a different mechanism for getting the value from SSM into the process.
 
 ### dev
 
