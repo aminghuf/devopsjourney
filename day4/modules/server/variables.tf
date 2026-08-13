@@ -23,11 +23,6 @@ variable "server_image" {
   type        = string
 }
 
-variable "server_location" {
-  description = "The AWS availability zone to launch the instance in (e.g. us-east-1a)."
-  type        = string
-}
-
 variable "dns_record_name" {
   description = "The name of the DNS record to be created."
   type        = string

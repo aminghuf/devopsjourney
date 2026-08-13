@@ -35,19 +35,19 @@ resource "aws_route_table" "public_rt" {
 }
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.1.0/24"
+  cidr_block              = cidrsubnet(var.vpc_cidr, 8, 1)
   map_public_ip_on_launch = false
   availability_zone       = data.aws_availability_zones.available.names[0]
   tags = {
-    Name = "${var.vpc_name}-public-subnet"
+    Name = "${var.vpc_name}-public-subnet-1"
   }
 }
 resource "aws_subnet" "public_2" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.2.0/24"
+  cidr_block              = cidrsubnet(var.vpc_cidr, 8, 2)
   map_public_ip_on_launch = false
   tags = {
-    Name = "${var.vpc_name}-public-subnet"
+    Name = "${var.vpc_name}-public-subnet-2"
   }
   availability_zone = data.aws_availability_zones.available.names[1]
 }
@@ -62,13 +62,19 @@ resource "aws_route_table_association" "public_rt_assoc_2" {
 }
 resource "aws_subnet" "private_1" {
   vpc_id            = aws_vpc.vpc.id
-  cidr_block        = "10.0.11.0/24"
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 11)
   availability_zone = data.aws_availability_zones.available.names[0]
+  tags = {
+    Name = "${var.vpc_name}-private-subnet-1"
+  }
 }
 resource "aws_subnet" "private_2" {
   vpc_id            = aws_vpc.vpc.id
-  cidr_block        = "10.0.12.0/24"
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 12)
   availability_zone = data.aws_availability_zones.available.names[1]
+  tags = {
+    Name = "${var.vpc_name}-private-subnet-2"
+  }
 }
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.vpc.id
