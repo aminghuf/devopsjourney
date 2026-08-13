@@ -48,12 +48,12 @@ variable "cloudflare_zone_id" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "The ID of the VPC to launch the instance in."
+variable "vpc_name" {
+  description = "The name of the VPC to be created."
   type        = string
 }
 
-variable "subnet_id" {
-  description = "The ID of the subnet to launch the instance in."
+variable "vpc_cidr" {
+  description = "The CIDR block of the VPC to be created."
   type        = string
 }
