@@ -40,4 +40,12 @@ module "web_server" {
   create_ssh_key     = true
   firewall_name      = var.firewall_name
   ssh_key_public     = var.ssh_key_public
+  vpc_id             = module.network.vpc_id
+  subnet_id          = module.network.public_subnet_ids[0]
+}
+
+module "network" {
+  source   = "../../modules/network"
+  vpc_name = var.vpc_name
+  vpc_cidr = var.vpc_cidr
 }

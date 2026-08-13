@@ -8,9 +8,6 @@ terraform {
 
   }
 }
-provider "aws" {
-  region = "eu-north-1"
-}
 data "aws_availability_zones" "available" {
   state = "available"
 }

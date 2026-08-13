@@ -47,3 +47,12 @@ variable "cloudflare_zone_id" {
   description = "The DNS Zone ID of your domain in Cloudflare"
   type        = string
 }
+
+variable "vpc_name" {
+  description = "The name of the VPC to be created."
+  type        = string
+}
+variable "vpc_cidr" {
+  description = "The CIDR block of the VPC to be created."
+  type        = string
+}
