@@ -13,7 +13,7 @@ terraform {
   }
   backend "s3" {
     bucket       = "s3-bucket-devopsjourney"
-    key          = "staging/terraform.tfstate"
+    key          = "day4/staging/platform.tfstate"
     region       = "eu-north-1"
     encrypt      = true
     use_lockfile = true # native S3 locking, TF >= 1.10

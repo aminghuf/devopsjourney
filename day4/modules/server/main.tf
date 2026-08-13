@@ -42,26 +42,48 @@ data "aws_key_pair" "existing" {
 locals {
   ssh_key_name = var.create_ssh_key ? aws_key_pair.default[0].key_name : data.aws_key_pair.existing[0].key_name
 }
+resource "aws_iam_role" "ec2_role" {
+  name = "${var.server_name}-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "${var.server_name}-profile"
+  role = aws_iam_role.ec2_role.name
+}
 
 resource "aws_instance" "web" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.server_type
-  availability_zone      = var.server_location
   key_name               = local.ssh_key_name
   vpc_security_group_ids = [aws_security_group.web_and_ssh.id]
-
+  subnet_id              = var.subnet_id
   tags = {
     Name = var.server_name
   }
   lifecycle {
     ignore_changes = [ami]
   }
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 }
 
 resource "aws_security_group" "web_and_ssh" {
   name        = var.firewall_name
   description = "Allow SSH from admin IP and HTTP/HTTPS from anywhere"
-
+  vpc_id      = var.vpc_id
   ingress {
     description = "SSH"
     from_port   = 22

@@ -47,3 +47,13 @@ variable "cloudflare_zone_id" {
   description = "The DNS Zone ID of your domain in Cloudflare"
   type        = string
 }
+
+variable "vpc_id" {
+  description = "The ID of the VPC to launch the instance in."
+  type        = string
+}
+
+variable "subnet_id" {
+  description = "The ID of the subnet to launch the instance in."
+  type        = string
+}
