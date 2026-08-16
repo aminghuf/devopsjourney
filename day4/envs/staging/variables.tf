@@ -18,11 +18,6 @@ variable "server_image" {
   type        = string
 }
 
-variable "server_location" {
-  description = "The location of the server to be created."
-  type        = string
-}
-
 variable "dns_record_name" {
   description = "The name of the DNS record to be created."
   type        = string
