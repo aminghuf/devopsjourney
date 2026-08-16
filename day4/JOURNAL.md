@@ -38,6 +38,76 @@ Hook: the day3 retro flagged that AWS CLI was authenticated as root and said tha
 **State lock, mid-session**
 - Hit a real S3-native-lock `412 PreconditionFailed` on `envs/dev` while another `plan` was still holding the lock (`Lock ID 51dec4a9-9b78-4041-cc4c-02eae4f20f8e`, `OperationTypePlan`). Same mechanism day3 proved deliberately — `use_lockfile = true`, no DynamoDB table — just hit incidentally this time from an interrupted run rather than as a planned exercise. Resolved with `terraform force-unlock <id>` after confirming nothing else was actually still running against that state.
 
+## Verification: apply, then destroy — for real
+
+No separate `apply` transcript was captured, but the `destroy` plans below are effectively proof of what `apply` built: real instance IDs, real attached EIPs, real Cloudflare DNS records, all created within the same minute per environment (`2026-08-16T08:45:44Z`–`08:46:50Z`), then torn down in this same session.
+
+**`envs/dev`** — VPC `vpc-0b75c29b7996bb8c0` (`10.0.0.0/16`), instance `i-0310c5b8d13093d38` (`t3.micro`, key `amin-dev`), EIP `51.20.202.59` bound to it, DNS record `amin-dns-dev.aminghuf.dev` -> that EIP, IAM role `amin-dev-role` with `AmazonSSMManagedInstanceCore` attached:
+
+```
+Plan: 0 to add, 0 to change, 21 to destroy.
+
+Changes to Outputs:
+  - public_subnet_ids = "subnet-04a8db48cd2a8156f" -> null
+  - server_ip         = "51.20.202.59" -> null
+  - vpc_id            = "vpc-0b75c29b7996bb8c0" -> null
+
+module.web_server.cloudflare_record.server_dns: Destruction complete after 0s
+module.network.aws_route_table_association.*  (x4): Destruction complete
+module.network.aws_route_table.private_rt: Destruction complete
+module.network.aws_subnet.private_1 / private_2: Destruction complete
+module.web_server.aws_eip_association.main: Destruction complete after 2s
+module.web_server.aws_eip.web: Destruction complete after 1s
+module.network.aws_route_table.public_rt: Destruction complete
+module.network.aws_internet_gateway.igw: Destruction complete
+module.web_server.aws_instance.web: Still destroying... [1m0s elapsed]
+module.web_server.aws_instance.web: Destruction complete after 1m0s
+module.web_server.aws_key_pair.default[0] / aws_iam_instance_profile.ec2_profile: Destroying...
+module.network.aws_subnet.public_1 / public_2: Destroying...
+# (output cut off here by paste length — final confirmation line not captured)
+```
+
+**`envs/staging`** — VPC `vpc-006433fbdd8bcda8e` (`10.1.0.0/16`), instance `i-0defcf25e4df85735` (`t3.micro`, key `amin-staging`), EIP `13.62.174.78`, DNS record `amin-dns-staging.aminghuf.dev`, IAM role `amin-staging-role`:
+
+```
+Plan: 0 to add, 0 to change, 21 to destroy.
+
+Changes to Outputs:
+  - public_subnet_ids = "subnet-077eff2cada1e2f5b" -> null
+  - server_ip         = "13.62.174.78" -> null
+  - vpc_id            = "vpc-006433fbdd8bcda8e" -> null
+
+Destroy complete! Resources: 21 destroyed.
+```
+
+Both environments' plans match exactly: 21 resources each — VPC, 2 public + 2 private subnets, IGW, 2 route tables + 4 associations, security group, EC2 instance, EIP + association, IAM role + policy attachment + instance profile, key pair, Cloudflare DNS record. Confirms `dev` and `staging` really did build symmetric, independent infrastructure from the same module pair with only `vpc_cidr`/naming differing.
+
+One live rerun of day3's "config copied from the wrong place" theme, caught in the terminal directly: `terraform destroy --auto-allow` on `dev` failed with `flag provided but not defined: -auto-allow` before anything ran — the correct flag is `--auto-approve`. No damage (it errored before touching AWS), just a typo, but it's the same day's pattern one more time — command/config carried over slightly wrong from whatever it was copied from.
+
+**`envs/account`** — full apply-then-destroy cycle, the only one of the three with a captured `apply` transcript:
+
+```
+Plan: 1 to add, 0 to change, 0 to destroy.
+  Enter a value: yes
+
+aws_budgets_budget.budget: Creating...
+aws_budgets_budget.budget: Creation complete after 9s [id=462052762470:day4-monthly-budget]
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+```
+
+`$10/month`, notifying `amin.gha98@gmail.com` at 80% actual / 100% forecasted — matches `terraform.tfvars` exactly. Then torn down:
+
+```
+Plan: 0 to add, 0 to change, 1 to destroy.
+aws_budgets_budget.budget: Destroying... [id=462052762470:day4-monthly-budget]
+aws_budgets_budget.budget: Destruction complete after 1s
+
+Destroy complete! Resources: 1 destroyed.
+```
+
+**Still open:** the tail end of `dev`'s destroy confirmation and the `apply` transcripts for `dev`/`staging` aren't captured here — the destroy plans stand in as evidence of what was built, per above.
+
 ## What I'd do differently
 
 Every one of today's bugs except the state lock was a **copy-paste that didn't get fully adapted to its new location** — `modules/network`'s backend/provider block copied from `envs/account`, `modules/network/outputs.tf`'s `module.vpc.*` references copied from a different module shape, `staging`'s `.envrc` copied from `dev` without updating the path, `dev`'s `terraform.tfvars` copied forward from the Hetzner era without updating the values, subnet tags copied-and-mangled mid-edit. None of these are conceptually hard mistakes — they're all "this came from somewhere else and one detail didn't get changed." `terraform validate` caught the ones that were structural (undeclared module, unexpected argument); it caught none of the ones that were valid HCL with wrong values (`cx22` as an instance type, `ubuntu-24.04` as an AMI filter fragment, dev's SSM path in staging's `.envrc`). The next multi-env change should include actually running `plan` — not just `validate` — against every environment being touched, specifically because `validate` only proves the config is well-formed, not that the values in it are real.
