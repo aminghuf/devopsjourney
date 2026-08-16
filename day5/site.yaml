@@ -1,0 +1,24 @@
+---
+- name: Install and configure nginx on my server
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Ensure nginx is installed
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Ensure nginx service is enabled and running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Deploy a simple homepage
+      ansible.builtin.copy:
+        content: |
+          Welcome to my nginx server!
+        dest: /var/www/html/index.html
+        mode: '0644'

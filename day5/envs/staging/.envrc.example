@@ -1,0 +1,2 @@
+export CLOUDFLARE_API_TOKEN=$(aws ssm get-parameter --name "/day3/staging/cloudflare_api_token" --region eu-north-1 --with-decryption --query Parameter.Value --output text)
+export TF_VAR_cloudflare_zone_id=$(aws ssm get-parameter --name "/day3/staging/cloudflare_zone_id" --region eu-north-1 --with-decryption --query Parameter.Value --output text)
